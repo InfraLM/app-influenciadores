@@ -5,7 +5,44 @@ const createGenericController = (tableName) => {
   return {
     getAll: async (req, res) => {
       try {
-        const result = await query(`SELECT * FROM ${tableName} ORDER BY created_at DESC`);
+        // Support query parameters for filtering
+        const filters = req.query;
+        let queryText = `SELECT * FROM ${tableName}`;
+        const values = [];
+
+        // Build WHERE clause if filters are provided
+        if (Object.keys(filters).length > 0) {
+          const conditions = [];
+          let paramIndex = 1;
+
+          Object.keys(filters).forEach(key => {
+            // Skip pagination and ordering params
+            if (!['limit', 'offset', 'order'].includes(key)) {
+              conditions.push(`${key} = $${paramIndex}`);
+              values.push(filters[key]);
+              paramIndex++;
+            }
+          });
+
+          if (conditions.length > 0) {
+            queryText += ` WHERE ${conditions.join(' AND ')}`;
+          }
+        }
+
+        // Add ordering
+        if (filters.order) {
+          const [column, direction] = filters.order.split(':');
+          queryText += ` ORDER BY ${column} ${direction === 'asc' ? 'ASC' : 'DESC'}`;
+        } else {
+          queryText += ` ORDER BY created_at DESC`;
+        }
+
+        // Add limit if provided
+        if (filters.limit) {
+          queryText += ` LIMIT ${parseInt(filters.limit)}`;
+        }
+
+        const result = await query(queryText, values);
         res.json(result.rows);
       } catch (error) {
         console.error(`Get ${tableName} error:`, error);
