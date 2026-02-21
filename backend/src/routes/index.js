@@ -75,4 +75,20 @@ const userRolesController = createGenericController('inf_user_roles');
 router.get('/user-roles', authenticateToken, requireAdmin, userRolesController.getAll);
 router.put('/user-roles/:id', authenticateToken, requireAdmin, userRolesController.update);
 
+// Aliases with underscore for compatibility (frontend uses underscore)
+router.get('/performance_evaluations', authenticateToken, performanceController.getAll);
+router.get('/performance_evaluations/:id', authenticateToken, performanceController.getById);
+router.post('/performance_evaluations', authenticateToken, requireAdmin, performanceController.create);
+router.put('/performance_evaluations/:id', authenticateToken, requireAdmin, performanceController.update);
+router.delete('/performance_evaluations/:id', authenticateToken, requireAdmin, performanceController.delete);
+
+router.get('/monthly_goals', authenticateToken, monthlyGoalsController.getAll);
+router.get('/monthly_goals/:id', authenticateToken, monthlyGoalsController.getById);
+router.post('/monthly_goals', authenticateToken, requireAdmin, monthlyGoalsController.create);
+router.put('/monthly_goals/:id', authenticateToken, requireAdmin, monthlyGoalsController.update);
+router.delete('/monthly_goals/:id', authenticateToken, requireAdmin, monthlyGoalsController.delete);
+
+router.get('/user_roles', authenticateToken, requireAdmin, userRolesController.getAll);
+router.put('/user_roles/:id', authenticateToken, requireAdmin, userRolesController.update);
+
 module.exports = router;
