@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(\"c:/devVini/app-influenciadores/.env\":*)",
+      "Bash(\"c:/devVini/app-influenciadores/.env.production\":*)",
+      "Bash(\"c:/devVini/app-influenciadores/backend/.env\":*)",
+      "Bash(\"c:/devVini/app-influenciadores/backend/.env.production\":*)",
+      "Bash(\"c:/devVini/app-influenciadores/.gitignore\":*)",
+      "Bash(\"c:/devVini/app-influenciadores/backend/src/middleware/auth.ts\":*)",
+      "Bash(\"c:/devVini/app-influenciadores/backend/src/controllers/authController.ts\":*)",
+      "Bash(\"c:/devVini/app-influenciadores/backend/create-admin.sql\":*)",
+      "Bash(npm run dev:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(node fix-admin-password.js:*)",
+      "Bash(c:/devVini/app-influenciadores/.env.production:*)",
+      "Bash(test:*)"
+    ]
+  }
+}

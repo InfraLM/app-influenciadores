@@ -1,0 +1,121 @@
+# .htaccess para public_html/influenciadores/
+# Backend e Frontend na mesma pasta
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /influenciadores/
+
+  # ====================================
+  # SEGURANÇA: Bloquear acesso ao backend
+  # ====================================
+
+  # Bloquear acesso direto à pasta backend/
+  RewriteRule ^backend/ - [F,L]
+
+  # ====================================
+  # SPA (Single Page Application)
+  # ====================================
+
+  # Não reescrever se for index.html
+  RewriteRule ^index\.html$ - [L]
+
+  # Não reescrever arquivos ou diretórios existentes (assets, imagens, etc)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # Redirecionar tudo para index.html (React Router)
+  RewriteRule . /influenciadores/index.html [L]
+</IfModule>
+
+# ====================================
+# SEGURANÇA: Bloquear arquivos sensíveis APENAS no backend
+# ====================================
+
+# Bloquear acesso a arquivos .env em qualquer lugar
+<Files ".env*">
+  Require all denied
+</Files>
+
+# Bloquear arquivos SQL em qualquer lugar
+<FilesMatch "\.sql$">
+  Require all denied
+</FilesMatch>
+
+# Bloquear node_modules
+<IfModule mod_alias.c>
+  RedirectMatch 404 /influenciadores/backend/node_modules/
+</IfModule>
+
+# Bloquear package.json no backend
+<Files "package.json">
+  Order allow,deny
+  Deny from all
+</Files>
+
+# ====================================
+# COMPRESSÃO
+# ====================================
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/plain
+  AddOutputFilterByType DEFLATE text/xml
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE font/ttf
+  AddOutputFilterByType DEFLATE font/otf
+  AddOutputFilterByType DEFLATE font/woff
+  AddOutputFilterByType DEFLATE font/woff2
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# ====================================
+# CACHE
+# ====================================
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Imagens - 1 ano
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+
+  # CSS e JavaScript - 1 mês
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+
+  # Fonts - 1 ano
+  ExpiresByType font/ttf "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+
+  # HTML - sem cache
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# ====================================
+# SEGURANÇA ADICIONAL
+# ====================================
+
+<IfModule mod_headers.c>
+  # Prevenir clickjacking
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  # Prevenir MIME sniffing
+  Header always set X-Content-Type-Options "nosniff"
+
+  # XSS Protection
+  Header always set X-XSS-Protection "1; mode=block"
+
+  # Referrer Policy
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Desabilitar listagem de diretórios
+Options -Indexes
