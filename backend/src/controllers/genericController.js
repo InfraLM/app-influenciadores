@@ -16,8 +16,8 @@ const createGenericController = (tableName) => {
           let paramIndex = 1;
 
           Object.keys(filters).forEach(key => {
-            // Skip pagination and ordering params
-            if (!['limit', 'offset', 'order'].includes(key)) {
+            // Skip pagination, ordering, and Vercel-specific params
+            if (!['limit', 'offset', 'order', 'path'].includes(key)) {
               conditions.push(`${key} = $${paramIndex}`);
               values.push(filters[key]);
               paramIndex++;
