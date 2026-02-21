@@ -31,9 +31,11 @@ git push origin main
    - **Output Directory**: `dist` (já configurado)
    - **Install Command**: `npm install`
 
-### 3. Configurar Variáveis de Ambiente
+### 3. ⚠️ CONFIGURAR VARIÁVEIS DE AMBIENTE (CRÍTICO!)
 
-Na seção "Environment Variables" da Vercel, adicione:
+**IMPORTANTE**: As variáveis de ambiente DEVEM ser configuradas na Vercel antes do deploy funcionar!
+
+Na seção "Environment Variables" da Vercel (Settings → Environment Variables), adicione TODAS as variáveis abaixo:
 
 #### Variáveis do Frontend
 
