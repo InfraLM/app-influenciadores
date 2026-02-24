@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Edit, Trash2, Image, MoreHorizontal, Eye } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLinkButton } from './ExternalLinkButton';
@@ -22,7 +21,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { ContentRecord, useDeleteContent } from '@/hooks/useContents';
-import { sendContentWebhook } from '@/services/webhookService';
 import { ContentDetailsView } from './ContentDetailsView';
 
 interface ContentListProps {
@@ -33,7 +31,6 @@ interface ContentListProps {
 }
 
 export function ContentList({ contents, onEdit, canEdit, showInfluencerName = false }: ContentListProps) {
-  const { profile } = useAuth();
   const [deleteContent, setDeleteContent] = useState<ContentRecord | null>(null);
   const [viewingContent, setViewingContent] = useState<ContentRecord | null>(null);
   const deleteContentMutation = useDeleteContent();
@@ -43,24 +40,6 @@ export function ContentList({ contents, onEdit, canEdit, showInfluencerName = fa
 
     try {
       await deleteContentMutation.mutateAsync(deleteContent.id);
-      
-      await sendContentWebhook('delete', {
-        id: deleteContent.id,
-        influencerId: deleteContent.influencer_id,
-        monthYear: deleteContent.month_year,
-        type: deleteContent.type,
-        postDate: deleteContent.post_date,
-        product: deleteContent.product,
-        reach: deleteContent.reach,
-        interactions: deleteContent.interactions,
-        notes: deleteContent.notes || undefined,
-        contentLink: deleteContent.content_link || undefined,
-        proofUrl: deleteContent.proof_url || undefined,
-        isExtra: deleteContent.is_extra,
-        createdAt: deleteContent.created_at,
-        updatedAt: deleteContent.updated_at,
-      }, profile);
-      
       toast.success('Conteúdo excluído com sucesso!');
       setDeleteContent(null);
     } catch (error) {

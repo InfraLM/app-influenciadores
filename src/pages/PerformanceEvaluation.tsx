@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ClipboardCheck, Save, Loader2, User } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +21,6 @@ import { toast } from 'sonner';
 import { useInfluencers } from '@/hooks/useInfluencers';
 import { useInfluencerEvaluation, useUpsertEvaluation } from '@/hooks/usePerformanceEvaluations';
 import { useContents } from '@/hooks/useContents';
-import { sendRankingWebhook } from '@/services/webhookService';
 
 // Quality checklist items (each worth 0.5 points, max 3 points)
 const qualityChecklistItems = [
@@ -43,7 +41,6 @@ const bonusItems = [
 ];
 
 export default function PerformanceEvaluation() {
-  const { profile } = useAuth();
   const currentDate = new Date();
   
   const [selectedMonth, setSelectedMonth] = useState(
@@ -190,24 +187,6 @@ export default function PerformanceEvaluation() {
         quality_checklist: qualityChecklist,
         bonus_checklist: bonusChecklist,
       });
-
-      // Send webhook for external integrations
-      await sendRankingWebhook('update', {
-        id: existingEvaluation?.id || `perf-${selectedInfluencer}-${selectedMonth}`,
-        influencerId: selectedInfluencer,
-        monthYear: selectedMonth,
-        leads: leadsCount,
-        sales: salesCount,
-        qualitativeNotes: qualitativeNotes || undefined,
-        contentQualityScore: qualityScore,
-        salesScore: salesScore,
-        engagementScore: parseFloat(engagementScore),
-        partnerPostureScore: parseFloat(postureScore),
-        bonusScore: bonusScore,
-        totalScore: totalScore,
-        createdAt: existingEvaluation?.created_at || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }, profile);
 
       toast.success('Avaliação salva com sucesso!');
     } catch (error) {

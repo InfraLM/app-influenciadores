@@ -71,11 +71,29 @@ router.get('/profiles', authenticateToken, requireAdmin, profilesController.getA
 router.get('/profiles/:id', authenticateToken, profilesController.getById);
 router.put('/profiles/:id', authenticateToken, profilesController.update);
 
-const userRolesController = createGenericController('inf_user_roles');
+const userRolesController = createGenericController('inf_user_roles', { defaultOrder: null });
 router.get('/user-roles', authenticateToken, requireAdmin, userRolesController.getAll);
 router.put('/user-roles/:id', authenticateToken, requireAdmin, userRolesController.update);
 
+// Prospect reopen history
+const prospectReopenHistoryController = createGenericController('inf_prospect_reopen_history');
+router.get('/prospect-reopen-history', authenticateToken, prospectReopenHistoryController.getAll);
+router.post('/prospect-reopen-history', authenticateToken, prospectReopenHistoryController.create);
+router.get('/prospect_reopen_history', authenticateToken, prospectReopenHistoryController.getAll);
+router.post('/prospect_reopen_history', authenticateToken, prospectReopenHistoryController.create);
+
 // Aliases with underscore for compatibility (frontend uses underscore)
+// Prospect card aliases (frontend calls prospect_cards, backend uses /prospects)
+router.get('/prospect_cards', authenticateToken, prospectsController.getAll);
+router.get('/prospect_cards/:id', authenticateToken, prospectsController.getById);
+router.post('/prospect_cards', authenticateToken, prospectsController.create);
+router.put('/prospect_cards/:id', authenticateToken, prospectsController.update);
+router.delete('/prospect_cards/:id', authenticateToken, prospectsController.delete);
+
+// Prospect comment aliases (frontend calls prospect_comments)
+router.get('/prospect_comments', authenticateToken, prospectCommentsController.getAll);
+router.post('/prospect_comments', authenticateToken, prospectCommentsController.create);
+
 router.get('/performance_evaluations', authenticateToken, performanceController.getAll);
 router.get('/performance_evaluations/:id', authenticateToken, performanceController.getById);
 router.post('/performance_evaluations', authenticateToken, requireAdmin, performanceController.create);

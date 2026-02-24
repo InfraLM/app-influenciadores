@@ -32,8 +32,6 @@ import { InfluencerForm } from '@/components/influencers/InfluencerForm';
 import { AdminInfluencerEditForm } from '@/components/influencers/AdminInfluencerEditForm';
 import { InfluencerDetailsView } from '@/components/influencers/InfluencerDetailsView';
 import { useInfluencers } from '@/hooks/useInfluencers';
-import { useAuth } from '@/contexts/AuthContext';
-import { sendInfluencerWebhook } from '@/services/webhookService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Tables } from '@/integrations/supabase/types';
@@ -41,7 +39,6 @@ import type { Tables } from '@/integrations/supabase/types';
 type Influencer = Tables<'influencers'>;
 
 export default function Influencers() {
-  const { profile } = useAuth();
   const { influencers, loading, refetch } = useInfluencers();
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -69,31 +66,6 @@ export default function Influencers() {
       toast.error(error.message || 'Erro ao excluir');
       return;
     }
-
-    // Send webhook
-    const webhookData = {
-      id: influencer.id,
-      fullName: influencer.full_name,
-      cpf: influencer.cpf,
-      email: influencer.email,
-      phone: influencer.phone,
-      pixKey: influencer.pix_key,
-      address: {
-        street: influencer.address_street,
-        number: influencer.address_number,
-        complement: influencer.address_complement || undefined,
-        neighborhood: influencer.address_neighborhood,
-        city: influencer.address_city,
-        state: influencer.address_state,
-        zipCode: influencer.address_zip_code,
-      },
-      couponPreference: influencer.coupon_preference,
-      isDoctor: influencer.is_doctor,
-      status: 'ended' as const,
-      createdAt: influencer.created_at,
-      updatedAt: influencer.updated_at,
-    };
-    await sendInfluencerWebhook('delete', webhookData, profile);
 
     toast.success(`Influenciador ${influencer.full_name} removido`);
     setDeleteInfluencer(null);

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,7 +6,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { sendContentWebhook } from '@/services/webhookService';
 import { uploadProofFile, uploadMultipleProofFiles } from '@/services/storageService';
 import { useCreateContent, useUpdateContent, ContentRecord, ContentInsert } from '@/hooks/useContents';
 
@@ -34,7 +32,6 @@ export function ContentForm({
   selectedMonth,
   influencerId,
 }: ContentFormProps) {
-  const { profile } = useAuth();
   const isEditing = !!editingContent;
   const createContent = useCreateContent();
   const updateContent = useUpdateContent();
@@ -184,33 +181,6 @@ export function ContentForm({
         });
       } else {
         await createContent.mutateAsync(contentData);
-      }
-
-      // Send webhook for external integrations
-      try {
-        await sendContentWebhook(
-          isEditing ? 'update' : 'create',
-          {
-            id: editingContent?.id || 'new',
-            influencerId,
-            monthYear: selectedMonth,
-            type: formData.type,
-            postDate: formData.postDate,
-            product: formData.product,
-            reach: parseInt(formData.reach),
-            interactions: parseInt(formData.interactions),
-            notes: formData.notes || undefined,
-            contentLink: formData.contentLink || undefined,
-            proofUrl: proofUrl || undefined,
-            isExtra,
-            createdAt: editingContent?.created_at || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          profile
-        );
-      } catch (webhookErr) {
-        // Webhook failure should not block content save
-        console.warn('[ContentForm] Webhook failed (non-blocking):', webhookErr);
       }
 
       toast.success(isEditing ? 'Conteúdo atualizado!' : 'Conteúdo registrado!');

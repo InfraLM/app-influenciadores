@@ -1,7 +1,7 @@
 const { query } = require('../config/database');
 
 // Generic CRUD controller for simple tables
-const createGenericController = (tableName) => {
+const createGenericController = (tableName, options = {}) => {
   return {
     getAll: async (req, res) => {
       try {
@@ -43,8 +43,8 @@ const createGenericController = (tableName) => {
         if (filters.order) {
           const [column, direction] = filters.order.split(':');
           queryText += ` ORDER BY ${column} ${direction === 'asc' ? 'ASC' : 'DESC'}`;
-        } else {
-          queryText += ` ORDER BY created_at DESC`;
+        } else if (options.defaultOrder !== null) {
+          queryText += ` ORDER BY ${options.defaultOrder || 'created_at DESC'}`;
         }
 
         // Add limit if provided

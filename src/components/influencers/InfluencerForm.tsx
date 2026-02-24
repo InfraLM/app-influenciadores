@@ -7,8 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
-import { sendInfluencerWebhook } from '@/services/webhookService';
 import { Influencer } from '@/types';
 
 const influencerSchema = z.object({
@@ -40,7 +38,6 @@ interface InfluencerFormProps {
 
 export function InfluencerForm({ onSuccess }: InfluencerFormProps) {
   const [isDoctor, setIsDoctor] = useState(false);
-  const { profile } = useAuth();
 
   const {
     register,
@@ -85,9 +82,6 @@ export function InfluencerForm({ onSuccess }: InfluencerFormProps) {
 
       console.log('Form data:', influencerData);
       toast.success('Influenciador cadastrado com sucesso!');
-      
-      // Send webhook
-      await sendInfluencerWebhook('create', influencerData, profile);
       
       onSuccess();
     } catch (error) {

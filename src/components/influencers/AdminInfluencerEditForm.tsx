@@ -17,8 +17,6 @@ import {
 } from '@/components/ui/select';
 import type { Tables, TablesUpdate } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
-import { sendInfluencerWebhook } from '@/services/webhookService';
-import { useAuth } from '@/contexts/AuthContext';
 
 type Influencer = Tables<'influencers'>;
 
@@ -68,7 +66,6 @@ export function AdminInfluencerEditForm({
   onSuccess,
   onCancel,
 }: AdminInfluencerEditFormProps) {
-  const { profile } = useAuth();
   const [saving, setSaving] = useState(false);
 
   // Parse posting_dates array
@@ -168,43 +165,6 @@ export function AdminInfluencerEditForm({
     if (error) {
       toast.error(error.message || 'Erro ao salvar');
       return;
-    }
-
-    // Send webhook
-    if (updated) {
-      const webhookData = {
-        id: updated.id,
-        fullName: updated.full_name,
-        cpf: updated.cpf,
-        email: updated.email,
-        phone: updated.phone,
-        pixKey: updated.pix_key,
-        address: {
-          street: updated.address_street,
-          number: updated.address_number,
-          complement: updated.address_complement || undefined,
-          neighborhood: updated.address_neighborhood,
-          city: updated.address_city,
-          state: updated.address_state,
-          zipCode: updated.address_zip_code,
-        },
-        couponPreference: updated.coupon_preference,
-        generatedCoupon: updated.generated_coupon || undefined,
-        referralLink: updated.referral_link || undefined,
-        instagram: updated.instagram || undefined,
-        university: updated.university || undefined,
-        period: updated.period || undefined,
-        isDoctor: updated.is_doctor,
-        yearsAsMedic: updated.years_as_medic || undefined,
-        contractUrl: updated.contract_url || undefined,
-        partnershipStartDate: updated.partnership_start_date || undefined,
-        partnershipEndDate: updated.partnership_end_date || undefined,
-        postingDates: updated.posting_dates || undefined,
-        status: (updated.status === 'inactive' ? 'ended' : 'active') as 'active' | 'ended',
-        createdAt: updated.created_at,
-        updatedAt: updated.updated_at,
-      };
-      await sendInfluencerWebhook('update', webhookData, profile);
     }
 
     toast.success('Influenciador atualizado com sucesso!');
