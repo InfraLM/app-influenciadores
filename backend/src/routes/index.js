@@ -4,6 +4,7 @@ const authController = require('../controllers/authController');
 const influencersController = require('../controllers/influencersController');
 const contentsController = require('../controllers/contentsController');
 const { createGenericController } = require('../controllers/genericController');
+const { uploadFile, upload } = require('../controllers/uploadController');
 
 const router = express.Router();
 
@@ -144,5 +145,8 @@ router.post('/rpc/get_ranking', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar ranking' });
   }
 });
+
+// File upload to Backblaze B2
+router.post('/upload', authenticateToken, upload.single('file'), uploadFile);
 
 module.exports = router;

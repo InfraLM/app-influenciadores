@@ -1,8 +1,12 @@
-import { api } from '@/integrations/supabase/client';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+function getToken(): string {
+  return localStorage.getItem('auth_token') || '';
+}
 
 /**
- * Uploads a proof file to the content-proofs storage bucket.
- * Returns the public URL of the uploaded file.
+ * Faz upload de um arquivo de comprovação para o Backblaze B2 via backend.
+ * Retorna a URL pública do arquivo.
  */
 export async function uploadProofFile(
   file: File,
@@ -15,27 +19,29 @@ export async function uploadProofFile(
   const suffix = index !== undefined ? `-${index}` : '';
   const fileName = `${influencerId}/${monthYear}/${contentType}${suffix}-${Date.now()}.${fileExt}`;
 
-  const { error: uploadError } = await api.storage
-    .from('content-proofs')
-    .upload(fileName, file, {
-      cacheControl: '3600',
-      upsert: true,
-    });
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('fileName', fileName);
 
-  if (uploadError) {
-    console.error('Error uploading proof file:', uploadError);
-    throw new Error(`Erro ao enviar comprovação: ${uploadError.message}`);
+  const response = await fetch(`${API_URL}/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      // Não definir Content-Type: o browser define automaticamente com o boundary correto
+    },
+    body: formData,
+  });
+
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.error || 'Erro ao enviar arquivo');
   }
 
-  const { data: urlData } = api.storage
-    .from('content-proofs')
-    .getPublicUrl(fileName);
-
-  return urlData.publicUrl;
+  return result.url as string;
 }
 
 /**
- * Uploads multiple proof files and returns an array of public URLs.
+ * Faz upload de múltiplos arquivos e retorna array de URLs públicas.
  */
 export async function uploadMultipleProofFiles(
   files: File[],
