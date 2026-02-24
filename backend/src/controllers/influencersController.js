@@ -2,11 +2,19 @@ const { query } = require('../config/database');
 
 const getInfluencers = async (req, res) => {
   try {
-    const result = await query(`
-      SELECT * FROM inf_influencers
-      ORDER BY full_name ASC
-    `);
+    const { user_id } = req.query;
 
+    let queryText = 'SELECT * FROM inf_influencers';
+    const params = [];
+
+    if (user_id) {
+      queryText += ' WHERE user_id = $1';
+      params.push(user_id);
+    }
+
+    queryText += ' ORDER BY full_name ASC';
+
+    const result = await query(queryText, params);
     res.json(result.rows);
   } catch (error) {
     console.error('Get influencers error:', error);

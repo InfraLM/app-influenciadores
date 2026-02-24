@@ -32,8 +32,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { api } from '@/integrations/supabase/client';
 import { useDocuments, useCreateDocument, useDeleteDocument, DocumentRecord } from '@/hooks/useDocuments';
+import { uploadDocumentFile } from '@/services/storageService';
 import { normalizeUrl } from '@/lib/externalLinks';
 
 const categoryLabels: Record<string, string> = {
@@ -102,34 +102,22 @@ export default function Documents() {
     setIsSubmitting(true);
 
     try {
-      // 1. Upload file to storage
-      const fileExt = formFile.name.split('.').pop() || 'pdf';
-      const fileName = `${Date.now()}-${formTitle.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
-
-      const { error: uploadError } = await api.storage
-        .from('documents')
-        .upload(fileName, formFile, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error('Storage upload error:', uploadError);
-        toast.error(`Falha ao enviar arquivo: ${uploadError.message}`);
+      // 1. Upload file to Backblaze B2 via backend
+      let fileUrl: string;
+      try {
+        fileUrl = await uploadDocumentFile(formFile, formTitle);
+      } catch (uploadErr: any) {
+        console.error('Document upload error:', uploadErr);
+        toast.error(`Falha ao enviar arquivo: ${uploadErr?.message || 'Erro desconhecido'}`);
         return;
       }
 
-      // 2. Get public URL
-      const { data: urlData } = api.storage
-        .from('documents')
-        .getPublicUrl(fileName);
-
-      // 3. Create document record in database
+      // 2. Create document record in database with the returned URL
       await createDocument.mutateAsync({
         title: formTitle,
         description: formDescription || null,
         category: formCategory as 'briefing_institutional' | 'rules',
-        file_url: urlData.publicUrl,
+        file_url: fileUrl,
         uploaded_by_user_id: user?.id || '',
         uploaded_by_name: profile?.name || 'Sistema',
       });

@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react';
 import { Camera, Loader2 } from 'lucide-react';
-import { api } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { uploadAvatarFile } from '@/services/storageService';
 
 interface ProfileAvatarUploadProps {
   userId: string;
@@ -46,32 +46,17 @@ export function ProfileAvatarUpload({
     }
 
     setUploading(true);
-    const ext = file.name.split('.').pop();
-    const filePath = `${userId}/avatar.${ext}`;
 
-    // Remove old avatar if exists
-    await api.storage.from('influencer-avatars').remove([`${userId}/avatar.jpg`, `${userId}/avatar.png`, `${userId}/avatar.webp`]);
-
-    const { error } = await api.storage
-      .from('influencer-avatars')
-      .upload(filePath, file, { upsert: true });
-
-    if (error) {
+    try {
+      const publicUrl = await uploadAvatarFile(file, userId);
+      toast.success('Foto de perfil atualizada!');
+      onUpload(publicUrl);
+    } catch (err: any) {
+      console.error('Avatar upload error:', err);
+      toast.error(`Erro ao fazer upload da imagem: ${err?.message || 'Erro desconhecido'}`);
+    } finally {
       setUploading(false);
-      toast.error('Erro ao fazer upload da imagem');
-      console.error(error);
-      return;
     }
-
-    const { data: publicData } = api.storage
-      .from('influencer-avatars')
-      .getPublicUrl(filePath);
-
-    const publicUrl = publicData?.publicUrl || '';
-
-    setUploading(false);
-    toast.success('Foto de perfil atualizada!');
-    onUpload(publicUrl);
   };
 
   return (
