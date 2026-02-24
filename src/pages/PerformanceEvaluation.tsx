@@ -181,6 +181,7 @@ export default function PerformanceEvaluation() {
         engagement_score: parseFloat(engagementScore),
         partner_posture_score: parseFloat(postureScore),
         bonus_score: bonusScore,
+        total_score: totalScore,
         leads: leadsCount,
         sales: salesCount,
         qualitative_notes: qualitativeNotes || null,

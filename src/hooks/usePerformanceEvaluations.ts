@@ -34,6 +34,7 @@ export interface PerformanceEvaluationInsert {
   engagement_score?: number;
   partner_posture_score?: number;
   bonus_score?: number;
+  total_score?: number;
   leads?: number;
   sales?: number;
   qualitative_notes?: string | null;
