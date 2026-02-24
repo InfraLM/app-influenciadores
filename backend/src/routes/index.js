@@ -79,16 +79,47 @@ router.put('/user-roles/:id', authenticateToken, requireAdmin, userRolesControll
 router.get('/performance_evaluations', authenticateToken, performanceController.getAll);
 router.get('/performance_evaluations/:id', authenticateToken, performanceController.getById);
 router.post('/performance_evaluations', authenticateToken, requireAdmin, performanceController.create);
+router.post('/performance_evaluations/upsert', authenticateToken, requireAdmin, performanceController.upsert);
 router.put('/performance_evaluations/:id', authenticateToken, requireAdmin, performanceController.update);
 router.delete('/performance_evaluations/:id', authenticateToken, requireAdmin, performanceController.delete);
 
 router.get('/monthly_goals', authenticateToken, monthlyGoalsController.getAll);
 router.get('/monthly_goals/:id', authenticateToken, monthlyGoalsController.getById);
 router.post('/monthly_goals', authenticateToken, requireAdmin, monthlyGoalsController.create);
+router.post('/monthly_goals/upsert', authenticateToken, requireAdmin, monthlyGoalsController.upsert);
 router.put('/monthly_goals/:id', authenticateToken, requireAdmin, monthlyGoalsController.update);
 router.delete('/monthly_goals/:id', authenticateToken, requireAdmin, monthlyGoalsController.delete);
 
 router.get('/user_roles', authenticateToken, requireAdmin, userRolesController.getAll);
 router.put('/user_roles/:id', authenticateToken, requireAdmin, userRolesController.update);
+
+// Also add upsert for hyphen versions
+router.post('/monthly-goals/upsert', authenticateToken, requireAdmin, monthlyGoalsController.upsert);
+router.post('/performance-evaluations/upsert', authenticateToken, requireAdmin, performanceController.upsert);
+
+// RPC endpoint for custom queries
+router.post('/rpc/get_ranking', authenticateToken, async (req, res) => {
+  const { query } = require('../config/database');
+  try {
+    const { p_month_year } = req.body;
+    const result = await query(`
+      SELECT
+        i.id AS influencer_id,
+        i.full_name,
+        i.instagram,
+        i.profile_photo_url,
+        COALESCE(pe.total_score, 0) AS total_score
+      FROM inf_influencers i
+      LEFT JOIN inf_performance_evaluations pe
+        ON pe.influencer_id = i.id AND pe.month_year = $1
+      WHERE i.status = 'active'
+      ORDER BY total_score DESC
+    `, [p_month_year]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('RPC get_ranking error:', error);
+    res.status(500).json({ error: 'Erro ao buscar ranking' });
+  }
+});
 
 module.exports = router;

@@ -17,7 +17,17 @@ const createGenericController = (tableName) => {
 
           Object.keys(filters).forEach(key => {
             // Skip pagination, ordering, and Vercel-specific params
-            if (!['limit', 'offset', 'order', 'path'].includes(key)) {
+            if (['limit', 'offset', 'order', 'path'].includes(key)) return;
+
+            // Support __in suffix for IN queries (e.g. month_year__in=2026-01,2026-02)
+            if (key.endsWith('__in')) {
+              const column = key.replace('__in', '');
+              const inValues = filters[key].split(',');
+              const placeholders = inValues.map((_, i) => `$${paramIndex + i}`).join(', ');
+              conditions.push(`${column} IN (${placeholders})`);
+              inValues.forEach((v) => values.push(v));
+              paramIndex += inValues.length;
+            } else {
               conditions.push(`${key} = $${paramIndex}`);
               values.push(filters[key]);
               paramIndex++;
@@ -130,6 +140,44 @@ const createGenericController = (tableName) => {
       } catch (error) {
         console.error(`Update ${tableName} error:`, error);
         res.status(500).json({ error: `Erro ao atualizar ${tableName}` });
+      }
+    },
+
+    upsert: async (req, res) => {
+      try {
+        const { data, onConflict } = req.body;
+        const keys = Object.keys(data);
+        const vals = Object.values(data);
+        const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+
+        const keysWithTs = [...keys, 'created_at', 'updated_at'];
+        const phWithTs = [...keys.map((_, i) => `$${i + 1}`), 'NOW()', 'NOW()'].join(', ');
+
+        const updateSet = keys
+          .filter(k => k !== 'id' && k !== 'created_at')
+          .map(k => `${k} = EXCLUDED.${k}`)
+          .join(', ');
+
+        updateSet && (updateSet + `, updated_at = NOW()`);
+
+        const conflictColumns = onConflict || 'id';
+        const updateCols = keys
+          .filter(k => k !== 'id' && k !== 'created_at')
+          .map(k => `${k} = EXCLUDED.${k}`)
+          .concat('updated_at = NOW()')
+          .join(', ');
+
+        const result = await query(`
+          INSERT INTO ${tableName} (${keysWithTs.join(', ')})
+          VALUES (${phWithTs})
+          ON CONFLICT (${conflictColumns}) DO UPDATE SET ${updateCols}
+          RETURNING *
+        `, vals);
+
+        res.json(result.rows[0]);
+      } catch (error) {
+        console.error(`Upsert ${tableName} error:`, error);
+        res.status(500).json({ error: `Erro ao salvar ${tableName}` });
       }
     },
 

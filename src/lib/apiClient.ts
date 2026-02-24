@@ -6,6 +6,7 @@ interface QueryBuilder<T = any> {
   select(columns?: string): SelectBuilder<T>;
   insert(data: any): InsertBuilder<T>;
   update(data: any): UpdateBuilder<T>;
+  upsert(data: any, options?: { onConflict?: string }): UpsertBuilder<T>;
   delete(): DeleteBuilder<T>;
 }
 
@@ -16,6 +17,7 @@ interface SelectBuilder<T> {
   lt(column: string, value: any): this;
   gte(column: string, value: any): this;
   lte(column: string, value: any): this;
+  in(column: string, values: any[]): this;
   order(column: string, options?: { ascending?: boolean }): this;
   limit(count: number): this;
   single(): Promise<{ data: T | null; error: any }>;
@@ -23,6 +25,10 @@ interface SelectBuilder<T> {
 }
 
 interface InsertBuilder<T> {
+  select(): { single(): Promise<{ data: T; error: any }> };
+}
+
+interface UpsertBuilder<T> {
   select(): { single(): Promise<{ data: T; error: any }> };
 }
 
@@ -174,6 +180,10 @@ export class ApiClient {
             filters[column] = value;
             return builder;
           },
+          in: (column: string, values: any[]) => {
+            params.append(`${column}__in`, values.join(','));
+            return builder;
+          },
           order: (column: string, options?: { ascending?: boolean }) => {
             params.append('order', `${column}:${options?.ascending ? 'asc' : 'desc'}`);
             return builder;
@@ -234,12 +244,30 @@ export class ApiClient {
         }),
       }),
 
+      upsert: (data: any, options?: { onConflict?: string }) => ({
+        select: () => ({
+          single: async () => {
+            return this.fetch<any>(`/${table}/upsert`, {
+              method: 'POST',
+              body: JSON.stringify({ data, onConflict: options?.onConflict }),
+            });
+          },
+        }),
+      }),
+
       delete: () => ({
         eq: (column: string, value: any) => this.fetch(`/${table}/${value}`, {
           method: 'DELETE',
         }),
       }),
     };
+  }
+
+  async rpc(functionName: string, params?: Record<string, any>): Promise<{ data: any; error: any }> {
+    return this.fetch<any>(`/rpc/${functionName}`, {
+      method: 'POST',
+      body: JSON.stringify(params || {}),
+    });
   }
 }
 
