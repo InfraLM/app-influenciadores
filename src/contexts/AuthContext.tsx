@@ -1,23 +1,27 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '@/integrations/supabase/client';
-import type { User, Session } from '@api/api-js';
 import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
 
-interface Profile {
+interface User {
   id: string;
+  email: string;
+}
+
+interface Profile {
+  id?: string;
   user_id: string;
   name: string;
   email: string;
-  status: Database['public']['Enums']['user_status'];
-  created_at: string;
-  updated_at: string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
+  session: any | null;
   profile: Profile | null;
   role: AppRole | null;
   influencerId: string | null;
@@ -35,81 +39,48 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<any | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [influencerId, setInfluencerId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUserData = useCallback(async (userId: string) => {
-    try {
-      // Fetch profile
-      const { data: profileData } = await api
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (profileData) {
-        setProfile(profileData);
-      }
-
-      // Fetch role
-      const { data: roleData } = await api
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (roleData) {
-        setRole(roleData.role);
-      }
-
-      // Fetch influencer if role is influencer
-      if (roleData?.role === 'influencer') {
-        const { data: influencerData } = await api
-          .from('influencers')
-          .select('id')
-          .eq('user_id', userId)
-          .maybeSingle();
-
-        if (influencerData) {
-          setInfluencerId(influencerData.id);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
+  // Apply session data returned directly from backend (login/session endpoints)
+  // Backend returns: { user: {id, email}, profile, role, influencerId }
+  const applySessionData = useCallback((sessionData: any) => {
+    if (!sessionData) {
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setRole(null);
+      setInfluencerId(null);
+      return;
     }
+
+    if (sessionData.user) setUser(sessionData.user);
+    if (sessionData.profile) setProfile(sessionData.profile);
+    if (sessionData.role) setRole(sessionData.role as AppRole);
+    setInfluencerId(sessionData.influencerId || null);
+    setSession(sessionData);
   }, []);
 
   useEffect(() => {
-    // Set up auth state listener BEFORE checking session
+    // Listen for auth state changes (triggered by login/logout)
     const { data: { subscription } } = api.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-
-        if (currentSession?.user) {
-          // Defer data fetching to avoid Supabase deadlock
-          setTimeout(() => {
-            fetchUserData(currentSession.user.id);
-          }, 0);
+      (_event, currentSession) => {
+        if (currentSession) {
+          applySessionData(currentSession);
         } else {
-          setProfile(null);
-          setRole(null);
-          setInfluencerId(null);
+          applySessionData(null);
         }
         setIsLoading(false);
       }
     );
 
-    // Check for existing session
+    // Check for existing session on mount (token in localStorage)
     api.auth.getSession().then(({ data: { session: existingSession } }) => {
-      setSession(existingSession);
-      setUser(existingSession?.user ?? null);
-
-      if (existingSession?.user) {
-        fetchUserData(existingSession.user.id);
+      if (existingSession) {
+        applySessionData(existingSession);
       }
       setIsLoading(false);
     });
@@ -117,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchUserData]);
+  }, [applySessionData]);
 
   const login = useCallback(async (email: string, password: string) => {
     const { error } = await api.auth.signInWithPassword({ email, password });
@@ -153,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signup,
     logout,
     isAdmin: role === 'admin',
-    isTeam: role === 'admin', // isTeam is same as isAdmin for now
+    isTeam: role === 'admin',
     isInfluencer: role === 'influencer',
   };
 
