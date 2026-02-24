@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import type { TablesUpdate } from '@/integrations/supabase/types';
 
 type InfluencerUpdate = TablesUpdate<'influencers'>;
@@ -17,7 +17,7 @@ export function useUpdateInfluencer(influencerId: string | undefined) {
     setSaving(true);
     setError(null);
 
-    const { data, error: updateError } = await supabase
+    const { data, error: updateError } = await api
       .from('influencers')
       .update(updates)
       .eq('id', influencerId)

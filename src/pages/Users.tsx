@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,14 +37,14 @@ export default function Users() {
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
-      const { data: profiles, error: profilesError } = await supabase
+      const { data: profiles, error: profilesError } = await api
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
 
-      const { data: roles, error: rolesError } = await supabase
+      const { data: roles, error: rolesError } = await api
         .from('user_roles')
         .select('*');
 
@@ -73,7 +73,7 @@ export default function Users() {
   const fetchInvites = async () => {
     setLoadingInvites(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('invites')
         .select('*')
         .order('created_at', { ascending: false });
@@ -109,7 +109,7 @@ export default function Users() {
     const newStatus: UserStatus = user.status === 'active' ? 'inactive' : 'active';
 
     try {
-      const { error } = await supabase
+      const { error } = await api
         .from('profiles')
         .update({ status: newStatus })
         .eq('id', user.id);

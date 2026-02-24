@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { Tables, TablesUpdate } from '@/integrations/supabase/types';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 
 type Influencer = Tables<'influencers'>;
 
@@ -153,7 +153,7 @@ export function AdminInfluencerEditForm({
       status: data.status,
     };
 
-    const { data: updated, error } = await supabase
+    const { data: updated, error } = await api
       .from('influencers')
       .update(updates)
       .eq('id', influencer.id)

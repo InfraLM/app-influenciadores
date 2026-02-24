@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import type {
@@ -12,7 +12,7 @@ export function useProspectCards() {
   return useQuery({
     queryKey: ['prospect-cards'],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (api as any)
         .from('prospect_cards')
         .select('*')
         .order('position', { ascending: true })
@@ -39,7 +39,7 @@ export function useCreateProspectCard() {
       whatsapp?: string;
       followers?: number;
     }) => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (api as any)
         .from('prospect_cards')
         .insert({
           ...card,
@@ -67,7 +67,7 @@ export function useUpdateProspectCard() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<ProspectCard> & { id: string }) => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (api as any)
         .from('prospect_cards')
         .update(updates)
         .eq('id', id)
@@ -118,7 +118,7 @@ export function useMoveProspectCard() {
         updates.rejection_notes = null;
       }
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (api as any)
         .from('prospect_cards')
         .update(updates)
         .eq('id', id)
@@ -141,7 +141,7 @@ export function useDeleteProspectCard() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase as any)
+      const { error } = await (api as any)
         .from('prospect_cards')
         .delete()
         .eq('id', id);
@@ -162,7 +162,7 @@ export function useProspectComments(cardId: string | null) {
     queryKey: ['prospect-comments', cardId],
     queryFn: async () => {
       if (!cardId) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (api as any)
         .from('prospect_comments')
         .select('*')
         .eq('prospect_card_id', cardId)
@@ -180,7 +180,7 @@ export function useAddProspectComment() {
 
   return useMutation({
     mutationFn: async ({ cardId, content }: { cardId: string; content: string }) => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (api as any)
         .from('prospect_comments')
         .insert({
           prospect_card_id: cardId,
@@ -204,7 +204,7 @@ export function useReopenHistory(cardId: string | null) {
     queryKey: ['prospect-reopen', cardId],
     queryFn: async () => {
       if (!cardId) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (api as any)
         .from('prospect_reopen_history')
         .select('*')
         .eq('prospect_card_id', cardId)
@@ -222,7 +222,7 @@ export function useAddReopenHistory() {
 
   return useMutation({
     mutationFn: async (cardId: string) => {
-      const { error } = await (supabase as any)
+      const { error } = await (api as any)
         .from('prospect_reopen_history')
         .insert({ prospect_card_id: cardId, reopened_by: user!.id });
       if (error) throw error;
@@ -240,7 +240,7 @@ export function useConvertProspect() {
     mutationFn: async (card: ProspectCard) => {
       const handle = extractInstagramHandle(card.instagram_url);
 
-      const { data: influencer, error: inflErr } = await supabase
+      const { data: influencer, error: inflErr } = await api
         .from('influencers')
         .insert({
           full_name: card.name,
@@ -262,7 +262,7 @@ export function useConvertProspect() {
         .single();
       if (inflErr) throw inflErr;
 
-      const { error: updateErr } = await (supabase as any)
+      const { error: updateErr } = await (api as any)
         .from('prospect_cards')
         .update({
           converted_influencer_id: influencer.id,

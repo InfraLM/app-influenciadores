@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { validateInviteToken, acceptInvite } from '@/services/userService';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import { Loader2, AlertCircle, CheckCircle2, UserPlus } from 'lucide-react';
 
 interface InviteData {
@@ -139,7 +139,7 @@ export default function AcceptInvite() {
 
       // Auto-login after successful account creation
       if (invite?.email) {
-        const { error: loginError } = await supabase.auth.signInWithPassword({
+        const { error: loginError } = await api.auth.signInWithPassword({
           email: invite.email,
           password: formData.password,
         });

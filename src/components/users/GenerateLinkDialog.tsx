@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import { createInvite, getInviteLink } from '@/services/userService';
 import { Copy, Link, Check, Share2 } from 'lucide-react';
 import type { AppRole, Influencer } from '@/types/users';
@@ -37,7 +37,7 @@ export function GenerateLinkDialog({ open, onOpenChange, onSuccess }: GenerateLi
   }, [open]);
 
   const fetchInfluencers = async () => {
-    const { data } = await supabase
+    const { data } = await api
       .from('influencers')
       .select('id, full_name, email, user_id')
       .is('user_id', null)

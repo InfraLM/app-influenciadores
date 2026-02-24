@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 
 /**
  * Uploads a proof file to the content-proofs storage bucket.
@@ -15,7 +15,7 @@ export async function uploadProofFile(
   const suffix = index !== undefined ? `-${index}` : '';
   const fileName = `${influencerId}/${monthYear}/${contentType}${suffix}-${Date.now()}.${fileExt}`;
 
-  const { error: uploadError } = await supabase.storage
+  const { error: uploadError } = await api.storage
     .from('content-proofs')
     .upload(fileName, file, {
       cacheControl: '3600',
@@ -27,7 +27,7 @@ export async function uploadProofFile(
     throw new Error(`Erro ao enviar comprovação: ${uploadError.message}`);
   }
 
-  const { data: urlData } = supabase.storage
+  const { data: urlData } = api.storage
     .from('content-proofs')
     .getPublicUrl(fileName);
 

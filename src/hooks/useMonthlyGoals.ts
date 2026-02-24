@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 
 export interface MonthlyGoals {
   id: string;
@@ -16,7 +16,7 @@ export function useMonthlyGoals(monthYear: string) {
   const query = useQuery({
     queryKey: ['monthly-goals', monthYear],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('monthly_goals')
         .select('*')
         .eq('month_year', monthYear)
@@ -33,7 +33,7 @@ export function useMonthlyGoals(monthYear: string) {
 
   const upsertMutation = useMutation({
     mutationFn: async (goals: Omit<MonthlyGoals, 'id'>) => {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('monthly_goals')
         .upsert(
           {

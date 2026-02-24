@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import { LinkIcon, AlertTriangle } from 'lucide-react';
 import type { AppRole, UserStatus, UserWithRole } from '@/types/users';
 
@@ -51,7 +51,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
     if (!open || !user) return;
 
     const fetchInfluencers = async () => {
-      const { data } = await supabase
+      const { data } = await api
         .from('influencers')
         .select('id, full_name, user_id')
         .order('full_name');
@@ -73,7 +73,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
     setLoading(true);
     try {
       // Update profile
-      const { error: profileError } = await supabase
+      const { error: profileError } = await api
         .from('profiles')
         .update({
           name: formData.name,
@@ -85,7 +85,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
 
       // Update role if changed
       if (formData.role !== user.role) {
-        const { error: roleError } = await supabase
+        const { error: roleError } = await api
           .from('user_roles')
           .update({ role: formData.role })
           .eq('user_id', user.user_id);
@@ -101,7 +101,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
         if (linkedInfluencerId !== currentLinkedId) {
           // Unlink previous influencer if any
           if (currentLinked) {
-            const { error: unlinkErr } = await supabase
+            const { error: unlinkErr } = await api
               .from('influencers')
               .update({ user_id: null })
               .eq('id', currentLinked.id);
@@ -110,7 +110,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
 
           // Link new influencer
           if (linkedInfluencerId !== 'none') {
-            const { error: linkErr } = await supabase
+            const { error: linkErr } = await api
               .from('influencers')
               .update({ user_id: user.user_id })
               .eq('id', linkedInfluencerId);

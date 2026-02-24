@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Influencer } from '@/types';
+import { api } from '@/integrations/supabase/client';
 
 const influencerSchema = z.object({
   fullName: z.string().min(1, 'Nome é obrigatório'),
@@ -51,42 +51,39 @@ export function InfluencerForm({ onSuccess }: InfluencerFormProps) {
   });
 
   const onSubmit = async (data: InfluencerFormData) => {
-    try {
-      const now = new Date().toISOString();
-      const influencerData: Influencer = {
-        id: `inf-${Date.now()}`,
-        fullName: data.fullName,
+    const { error } = await api
+      .from('influencers')
+      .insert({
+        full_name: data.fullName,
         cpf: data.cpf,
         email: data.email,
         phone: data.phone,
-        pixKey: data.pixKey,
-        address: {
-          street: data.street,
-          number: data.number,
-          complement: data.complement,
-          neighborhood: data.neighborhood,
-          city: data.city,
-          state: data.state,
-          zipCode: data.zipCode,
-        },
-        couponPreference: data.couponPreference,
-        instagram: data.instagram,
-        university: data.university,
-        period: data.period,
-        isDoctor: data.isDoctor,
-        yearsAsMedic: data.yearsAsMedic,
+        pix_key: data.pixKey,
+        address_street: data.street,
+        address_number: data.number,
+        address_complement: data.complement || null,
+        address_neighborhood: data.neighborhood,
+        address_city: data.city,
+        address_state: data.state,
+        address_zip_code: data.zipCode,
+        coupon_preference: data.couponPreference,
+        instagram: data.instagram || null,
+        university: data.university || null,
+        period: data.period || null,
+        is_doctor: data.isDoctor,
+        years_as_medic: data.yearsAsMedic ?? null,
         status: 'active',
-        createdAt: now,
-        updatedAt: now,
-      };
+      })
+      .select()
+      .single();
 
-      console.log('Form data:', influencerData);
-      toast.success('Influenciador cadastrado com sucesso!');
-      
-      onSuccess();
-    } catch (error) {
-      toast.error('Erro ao cadastrar influenciador');
+    if (error) {
+      toast.error(error.message || 'Erro ao cadastrar influenciador');
+      return;
     }
+
+    toast.success('Influenciador cadastrado com sucesso!');
+    onSuccess();
   };
 
   return (

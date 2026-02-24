@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import type { AppRole, Invite } from '@/types/users';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -10,7 +10,7 @@ export async function createUserDirect(data: {
   role: AppRole;
   influencerId?: string;
 }) {
-  const session = await supabase.auth.getSession();
+  const session = await api.auth.getSession();
   const token = session.data.session?.access_token;
 
   const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-user`, {
@@ -31,7 +31,7 @@ export async function createUserDirect(data: {
 }
 
 export async function deleteUser(userId: string) {
-  const session = await supabase.auth.getSession();
+  const session = await api.auth.getSession();
   const token = session.data.session?.access_token;
 
   const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-user`, {
@@ -58,7 +58,7 @@ export async function createInvite(data: {
   influencerId?: string;
   expiresInDays?: number;
 }) {
-  const session = await supabase.auth.getSession();
+  const session = await api.auth.getSession();
   const token = session.data.session?.access_token;
 
   const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-invite`, {
@@ -79,7 +79,7 @@ export async function createInvite(data: {
 }
 
 export async function revokeInvite(inviteId: string) {
-  const session = await supabase.auth.getSession();
+  const session = await api.auth.getSession();
   const token = session.data.session?.access_token;
 
   const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-invite`, {
@@ -100,7 +100,7 @@ export async function revokeInvite(inviteId: string) {
 }
 
 export async function resendInvite(inviteId: string, expiresInDays = 7) {
-  const session = await supabase.auth.getSession();
+  const session = await api.auth.getSession();
   const token = session.data.session?.access_token;
 
   const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-invite`, {

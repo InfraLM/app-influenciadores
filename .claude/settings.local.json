@@ -15,7 +15,9 @@
       "Bash(taskkill:*)",
       "Bash(node fix-admin-password.js:*)",
       "Bash(c:/devVini/app-influenciadores/.env.production:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(git add:*)",
+      "Bash(grep:*)"
     ]
   }
 }

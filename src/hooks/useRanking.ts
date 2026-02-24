@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 
 export interface RankingEntryData {
   position: number;
@@ -20,7 +20,7 @@ export function useRanking(monthYear: string) {
   return useQuery({
     queryKey: ['ranking', monthYear],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_ranking', {
+      const { data, error } = await api.rpc('get_ranking', {
         p_month_year: monthYear,
       });
 

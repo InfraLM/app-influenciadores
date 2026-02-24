@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
@@ -17,7 +17,7 @@ export function useUserRole(userId: string | undefined) {
 
     const fetchRole = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)

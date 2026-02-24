@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface ContentRecord {
@@ -42,7 +42,7 @@ export function useContents(monthYear: string, influencerFilter?: string) {
   return useQuery({
     queryKey: ['contents', monthYear, influencerFilter, influencerId],
     queryFn: async () => {
-      let query = supabase
+      let query = api
         .from('contents')
         .select(`
           *,
@@ -77,7 +77,7 @@ export function useCreateContent() {
 
   return useMutation({
     mutationFn: async (content: ContentInsert) => {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('contents')
         .insert(content)
         .select()
@@ -101,7 +101,7 @@ export function useUpdateContent() {
 
   return useMutation({
     mutationFn: async ({ id, ...content }: Partial<ContentInsert> & { id: string }) => {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('contents')
         .update(content)
         .eq('id', id)
@@ -126,7 +126,7 @@ export function useDeleteContent() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await api
         .from('contents')
         .delete()
         .eq('id', id);

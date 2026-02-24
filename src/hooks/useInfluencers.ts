@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Influencer = Tables<'influencers'>;
@@ -13,7 +13,7 @@ export function useInfluencers() {
     setLoading(true);
     setError(null);
 
-    const { data, error: fetchError } = await supabase
+    const { data, error: fetchError } = await api
       .from('influencers')
       .select('*')
       .order('full_name');

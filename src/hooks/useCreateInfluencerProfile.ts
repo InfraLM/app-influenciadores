@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import type { TablesInsert } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -24,7 +24,7 @@ export function useCreateInfluencerProfile() {
       user_id: user.id,
     };
 
-    const { data: created, error: insertError } = await supabase
+    const { data: created, error: insertError } = await api
       .from('influencers')
       .insert(insertData)
       .select()

@@ -32,7 +32,7 @@ import { InfluencerForm } from '@/components/influencers/InfluencerForm';
 import { AdminInfluencerEditForm } from '@/components/influencers/AdminInfluencerEditForm';
 import { InfluencerDetailsView } from '@/components/influencers/InfluencerDetailsView';
 import { useInfluencers } from '@/hooks/useInfluencers';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -57,7 +57,7 @@ export default function Influencers() {
   };
 
   const handleDelete = async (influencer: Influencer) => {
-    const { error } = await supabase
+    const { error } = await api
       .from('influencers')
       .delete()
       .eq('id', influencer.id);

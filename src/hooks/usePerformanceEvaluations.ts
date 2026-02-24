@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface PerformanceEvaluation {
@@ -46,7 +46,7 @@ export function useMonthlyEvaluations(monthYear: string) {
   return useQuery({
     queryKey: ['performance-evaluations', monthYear],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('performance_evaluations')
         .select(`
           *,
@@ -71,7 +71,7 @@ export function useInfluencerEvaluation(influencerId: string, monthYear: string)
   return useQuery({
     queryKey: ['performance-evaluation', influencerId, monthYear],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('performance_evaluations')
         .select('*')
         .eq('influencer_id', influencerId)
@@ -98,7 +98,7 @@ export function useOwnEvaluation(monthYear: string) {
     queryFn: async () => {
       if (!influencerId) return null;
 
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('performance_evaluations')
         .select('*')
         .eq('influencer_id', influencerId)
@@ -122,7 +122,7 @@ export function useUpsertEvaluation() {
 
   return useMutation({
     mutationFn: async (evaluation: PerformanceEvaluationInsert) => {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('performance_evaluations')
         .upsert(evaluation, {
           onConflict: 'influencer_id,month_year',
@@ -151,7 +151,7 @@ export function useDeleteEvaluation() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await api
         .from('performance_evaluations')
         .delete()
         .eq('id', id);

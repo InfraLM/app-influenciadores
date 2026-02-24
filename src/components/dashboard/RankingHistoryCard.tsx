@@ -1,6 +1,6 @@
 import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 
 interface RankingHistoryCardProps {
   influencerId: string;
@@ -20,7 +20,7 @@ export function RankingHistoryCard({ influencerId }: RankingHistoryCardProps) {
     queryFn: async () => {
       if (!influencerId) return [];
       
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('performance_evaluations')
         .select('month_year, total_score')
         .eq('influencer_id', influencerId)

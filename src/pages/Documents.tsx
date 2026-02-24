@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import { useDocuments, useCreateDocument, useDeleteDocument, DocumentRecord } from '@/hooks/useDocuments';
 import { normalizeUrl } from '@/lib/externalLinks';
 
@@ -106,7 +106,7 @@ export default function Documents() {
       const fileExt = formFile.name.split('.').pop() || 'pdf';
       const fileName = `${Date.now()}-${formTitle.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await api.storage
         .from('documents')
         .upload(fileName, formFile, {
           cacheControl: '3600',
@@ -120,7 +120,7 @@ export default function Documents() {
       }
 
       // 2. Get public URL
-      const { data: urlData } = supabase.storage
+      const { data: urlData } = api.storage
         .from('documents')
         .getPublicUrl(fileName);
 

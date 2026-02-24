@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Camera, Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -50,9 +50,9 @@ export function ProfileAvatarUpload({
     const filePath = `${userId}/avatar.${ext}`;
 
     // Remove old avatar if exists
-    await supabase.storage.from('influencer-avatars').remove([`${userId}/avatar.jpg`, `${userId}/avatar.png`, `${userId}/avatar.webp`]);
+    await api.storage.from('influencer-avatars').remove([`${userId}/avatar.jpg`, `${userId}/avatar.png`, `${userId}/avatar.webp`]);
 
-    const { error } = await supabase.storage
+    const { error } = await api.storage
       .from('influencer-avatars')
       .upload(filePath, file, { upsert: true });
 
@@ -63,7 +63,7 @@ export function ProfileAvatarUpload({
       return;
     }
 
-    const { data: publicData } = supabase.storage
+    const { data: publicData } = api.storage
       .from('influencer-avatars')
       .getPublicUrl(filePath);
 

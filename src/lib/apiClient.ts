@@ -1,4 +1,6 @@
-// Enhanced API Client with better Supabase compatibility
+// Cliente HTTP do backend próprio (Express + PostgreSQL na Vercel)
+// Emula a interface do Supabase: api.from('tabela').select/insert/update/delete
+// e api.auth.signInWithPassword / api.rpc('funcao')
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 

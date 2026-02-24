@@ -1,5 +1,5 @@
-// API Client - migrado do Supabase para backend próprio
+// Cliente da API do backend próprio (Express + PostgreSQL)
+// Emula a interface do Supabase (.from, .auth, .rpc) mas chama o backend local/Vercel
 import { api } from '@/lib/api';
 
-// Re-export the API client as supabase for backward compatibility
-export const supabase = api as any;
+export { api };

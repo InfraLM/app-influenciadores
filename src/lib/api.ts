@@ -1,2 +1,2 @@
-// Re-export from apiClient for backward compatibility
-export { apiClient as api, apiClient as supabase } from './apiClient';
+// Cliente principal da API — use 'api' em todo o código
+export { apiClient as api } from './apiClient';

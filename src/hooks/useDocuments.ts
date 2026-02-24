@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 
 export interface DocumentRecord {
   id: string;
@@ -17,7 +17,7 @@ export function useDocuments(categoryFilter?: string) {
   return useQuery({
     queryKey: ['documents', categoryFilter],
     queryFn: async () => {
-      let query = supabase
+      let query = api
         .from('documents')
         .select('*')
         .order('created_at', { ascending: false });
@@ -50,7 +50,7 @@ export function useCreateDocument() {
       uploaded_by_user_id: string;
       uploaded_by_name: string;
     }) => {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('documents')
         .insert(doc)
         .select()
@@ -74,7 +74,7 @@ export function useDeleteDocument() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await api
         .from('documents')
         .delete()
         .eq('id', id);

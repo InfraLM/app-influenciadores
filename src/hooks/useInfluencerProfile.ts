@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Influencer = Tables<'influencers'>;
@@ -16,7 +16,7 @@ export function useInfluencerProfile(userId: string | undefined) {
     }
 
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await api
       .from('influencers')
       .select('*')
       .eq('user_id', userId)

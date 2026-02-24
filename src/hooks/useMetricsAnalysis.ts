@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/integrations/supabase/client';
 
 export interface MetricsFilters {
   monthYears: string[]; // array of YYYY-MM
@@ -50,7 +50,7 @@ export function useMetricsContents(monthYears: string[]) {
     queryKey: ['metrics-contents', monthYears],
     queryFn: async () => {
       if (monthYears.length === 0) return [];
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('contents')
         .select('*, influencer:influencers(full_name, instagram)')
         .in('month_year', monthYears)
@@ -67,7 +67,7 @@ export function useMetricsEvaluations(monthYears: string[]) {
     queryKey: ['metrics-evaluations', monthYears],
     queryFn: async () => {
       if (monthYears.length === 0) return [];
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('performance_evaluations')
         .select('*, influencer:influencers(full_name, instagram, profile_photo_url)')
         .in('month_year', monthYears)
@@ -83,7 +83,7 @@ export function useActiveInfluencers() {
   return useQuery({
     queryKey: ['metrics-influencers'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('influencers')
         .select('id, full_name, instagram, status, profile_photo_url')
         .eq('status', 'active')
