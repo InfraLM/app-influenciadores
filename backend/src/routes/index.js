@@ -13,6 +13,11 @@ router.post('/auth/signup', authController.signup);
 router.post('/auth/logout', authController.logout);
 router.get('/auth/session', authenticateToken, authController.getSession);
 
+// Admin user management
+router.post('/auth/admin/create-user', authenticateToken, requireAdmin, authController.adminCreateUser);
+router.post('/auth/invite', authenticateToken, requireAdmin, authController.createInviteWithEmail);
+router.post('/auth/invite/revoke', authenticateToken, requireAdmin, authController.revokeInvite);
+
 // Influencers routes
 router.get('/influencers', authenticateToken, influencersController.getInfluencers);
 router.get('/influencers/:id', authenticateToken, influencersController.getInfluencer);

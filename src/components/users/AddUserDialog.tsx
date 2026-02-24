@@ -38,9 +38,8 @@ export function AddUserDialog({ open, onOpenChange, onSuccess }: AddUserDialogPr
     const { data } = await api
       .from('influencers')
       .select('id, full_name, email, user_id')
-      .is('user_id', null)
       .order('full_name');
-    setInfluencers(data || []);
+    setInfluencers((data || []).filter((inf: any) => !inf.user_id));
   };
 
   const handleSubmit = async () => {

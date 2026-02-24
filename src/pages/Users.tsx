@@ -6,14 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Mail, Link, RefreshCw } from 'lucide-react';
+import { Search, Plus, Mail, RefreshCw } from 'lucide-react';
 
 import { UsersTable } from '@/components/users/UsersTable';
 import { InvitesList } from '@/components/users/InvitesList';
 import { AddUserDialog } from '@/components/users/AddUserDialog';
 import { EditUserDialog } from '@/components/users/EditUserDialog';
 import { InviteUserDialog } from '@/components/users/InviteUserDialog';
-import { GenerateLinkDialog } from '@/components/users/GenerateLinkDialog';
 
 import type { UserWithRole, Invite, UserStatus } from '@/types/users';
 
@@ -29,7 +28,6 @@ export default function Users() {
   // Dialog states
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [inviteUserOpen, setInviteUserOpen] = useState(false);
-  const [generateLinkOpen, setGenerateLinkOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserWithRole | null>(null);
 
   const { toast } = useToast();
@@ -141,14 +139,12 @@ export default function Users() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setGenerateLinkOpen(true)}>
-            <Link className="h-4 w-4 mr-2" />
-            Gerar Link
-          </Button>
+          {/* Botão de convite por email - oculto temporariamente, descomentar quando pronto:
           <Button variant="outline" onClick={() => setInviteUserOpen(true)}>
             <Mail className="h-4 w-4 mr-2" />
             Convidar
           </Button>
+          */}
           <Button onClick={() => setAddUserOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Usuário
@@ -245,12 +241,6 @@ export default function Users() {
       <InviteUserDialog
         open={inviteUserOpen}
         onOpenChange={setInviteUserOpen}
-        onSuccess={fetchInvites}
-      />
-
-      <GenerateLinkDialog
-        open={generateLinkOpen}
-        onOpenChange={setGenerateLinkOpen}
         onSuccess={fetchInvites}
       />
 

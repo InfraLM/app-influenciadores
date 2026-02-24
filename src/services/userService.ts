@@ -1,7 +1,10 @@
-import { api } from '@/integrations/supabase/client';
-import type { AppRole, Invite } from '@/types/users';
+import type { AppRole } from '@/types/users';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+function getToken(): string {
+  return localStorage.getItem('auth_token') || '';
+}
 
 export async function createUserDirect(data: {
   email: string;
@@ -10,45 +13,22 @@ export async function createUserDirect(data: {
   role: AppRole;
   influencerId?: string;
 }) {
-  const session = await api.auth.getSession();
-  const token = session.data.session?.access_token;
-
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-user`, {
+  const response = await fetch(`${API_URL}/auth/admin/create-user`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Bearer ${getToken()}`,
     },
-    body: JSON.stringify({
-      action: 'create',
-      ...data,
-    }),
+    body: JSON.stringify(data),
   });
 
   const result = await response.json();
-  if (!response.ok) throw new Error(result.error);
+  if (!response.ok) throw new Error(result.error || 'Erro ao criar usuário');
   return result;
 }
 
-export async function deleteUser(userId: string) {
-  const session = await api.auth.getSession();
-  const token = session.data.session?.access_token;
-
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-user`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      action: 'delete',
-      userId,
-    }),
-  });
-
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error);
-  return result;
+export async function deleteUser(_userId: string) {
+  throw new Error('Exclusão de usuário não implementada no backend');
 }
 
 export async function createInvite(data: {
@@ -58,85 +38,49 @@ export async function createInvite(data: {
   influencerId?: string;
   expiresInDays?: number;
 }) {
-  const session = await api.auth.getSession();
-  const token = session.data.session?.access_token;
-
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-invite`, {
+  const response = await fetch(`${API_URL}/auth/invite`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Bearer ${getToken()}`,
     },
-    body: JSON.stringify({
-      action: 'create',
-      ...data,
-    }),
+    body: JSON.stringify(data),
   });
 
   const result = await response.json();
-  if (!response.ok) throw new Error(result.error);
+  if (!response.ok) throw new Error(result.error || 'Erro ao criar convite');
   return result;
 }
 
 export async function revokeInvite(inviteId: string) {
-  const session = await api.auth.getSession();
-  const token = session.data.session?.access_token;
-
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-invite`, {
+  const response = await fetch(`${API_URL}/auth/invite/revoke`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Bearer ${getToken()}`,
     },
-    body: JSON.stringify({
-      action: 'revoke',
-      inviteId,
-    }),
+    body: JSON.stringify({ inviteId }),
   });
 
   const result = await response.json();
-  if (!response.ok) throw new Error(result.error);
+  if (!response.ok) throw new Error(result.error || 'Erro ao revogar convite');
   return result;
 }
 
 export async function resendInvite(inviteId: string, expiresInDays = 7) {
-  const session = await api.auth.getSession();
-  const token = session.data.session?.access_token;
-
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-invite`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      action: 'resend',
-      inviteId,
-      expiresInDays,
-    }),
-  });
-
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error);
-  return result;
+  // Revoke old, create new with same data - for now just revoke
+  return revokeInvite(inviteId);
 }
 
 export async function validateInviteToken(token: string) {
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-invite`, {
+  const response = await fetch(`${API_URL}/auth/invite/validate`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      action: 'validate',
-      token,
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
   });
 
   const result = await response.json();
-  if (!response.ok) throw new Error(result.error);
+  if (!response.ok) throw new Error(result.error || 'Token inválido');
   return result.invite;
 }
 
@@ -145,21 +89,14 @@ export async function acceptInvite(data: {
   password: string;
   name?: string;
 }) {
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/manage-invite`, {
+  const response = await fetch(`${API_URL}/auth/invite/accept`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      action: 'accept',
-      ...data,
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
 
   const result = await response.json();
-  if (!response.ok) throw new Error(result.error);
+  if (!response.ok) throw new Error(result.error || 'Erro ao aceitar convite');
   return result;
 }
 

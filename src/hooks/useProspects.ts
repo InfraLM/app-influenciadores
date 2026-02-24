@@ -15,7 +15,6 @@ export function useProspectCards() {
       const { data, error } = await (api as any)
         .from('prospect_cards')
         .select('*')
-        .order('position', { ascending: true })
         .order('created_at', { ascending: false });
       if (error) throw error;
       return (data || []) as ProspectCard[];

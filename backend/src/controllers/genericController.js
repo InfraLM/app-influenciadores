@@ -39,10 +39,14 @@ const createGenericController = (tableName, options = {}) => {
           }
         }
 
-        // Add ordering
+        // Add ordering (support multiple order params as array or single string)
         if (filters.order) {
-          const [column, direction] = filters.order.split(':');
-          queryText += ` ORDER BY ${column} ${direction === 'asc' ? 'ASC' : 'DESC'}`;
+          const orders = Array.isArray(filters.order) ? filters.order : [filters.order];
+          const orderClauses = orders.map(o => {
+            const [column, direction] = o.split(':');
+            return `${column} ${direction === 'asc' ? 'ASC' : 'DESC'}`;
+          });
+          queryText += ` ORDER BY ${orderClauses.join(', ')}`;
         } else if (options.defaultOrder !== null) {
           queryText += ` ORDER BY ${options.defaultOrder || 'created_at DESC'}`;
         }
