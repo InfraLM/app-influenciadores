@@ -17,7 +17,12 @@
       "Bash(c:/devVini/app-influenciadores/.env.production:*)",
       "Bash(test:*)",
       "Bash(git add:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(find /c/devVini/app-influenciadores -type f \\\\\\(-name *.sql -o -name *migration* -o -name *schema* \\\\\\))",
+      "Bash(find /c/devVini/app-influenciadores -type f \\\\\\(-name *.sql -o -name *.migration* -o -name *ddl* \\\\\\))",
+      "Bash(find /c/devVini/app-influenciadores -type f -name *.sql)",
+      "Bash(find /c/devVini/app-influenciadores/backend -type f \\\\\\(-name *.js -o -name *.sql \\\\\\))",
+      "Bash(npx tsc:*)"
     ]
   }
 }

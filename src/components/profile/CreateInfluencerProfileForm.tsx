@@ -30,7 +30,10 @@ const createSchema = z.object({
   university: z.string().optional().nullable(),
   period: z.string().optional().nullable(),
   is_doctor: z.boolean(),
-  years_as_medic: z.number().optional().nullable(),
+  years_as_medic: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined || Number.isNaN(Number(val)) ? undefined : Number(val)),
+    z.number().optional().nullable()
+  ),
 });
 
 type CreateFormData = z.infer<typeof createSchema>;

@@ -58,7 +58,7 @@ export function useCreateDocument() {
 
       if (error) {
         console.error('Error creating document:', error);
-        throw error;
+        throw new Error(error.message || error.error || 'Erro ao criar documento');
       }
 
       return data;

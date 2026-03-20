@@ -27,7 +27,10 @@ const influencerSchema = z.object({
   university: z.string().optional(),
   period: z.string().optional(),
   isDoctor: z.boolean(),
-  yearsAsMedic: z.number().optional(),
+  yearsAsMedic: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined || Number.isNaN(Number(val)) ? undefined : Number(val)),
+    z.number().optional()
+  ),
 });
 
 type InfluencerFormData = z.infer<typeof influencerSchema>;

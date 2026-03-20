@@ -234,16 +234,18 @@ export class ApiClient {
       }),
 
       update: (data: any) => ({
-        eq: (column: string, value: any) => ({
-          select: () => ({
-            single: async () => {
-              return this.fetch<any>(`/${table}/${value}`, {
-                method: 'PUT',
-                body: JSON.stringify(data),
-              });
-            },
-          }),
-        }),
+        eq: (column: string, value: any) => {
+          const executeFetch = () => this.fetch<any>(`/${table}/${value}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+          });
+          return {
+            select: () => ({
+              single: async () => executeFetch(),
+            }),
+            then: (resolve: any, reject: any) => executeFetch().then(resolve, reject),
+          };
+        },
       }),
 
       upsert: (data: any, options?: { onConflict?: string }) => ({

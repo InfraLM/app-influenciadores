@@ -99,6 +99,11 @@ export default function Documents() {
       return;
     }
 
+    if (!user?.id) {
+      toast.error('Sessão expirada. Faça login novamente.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -118,16 +123,17 @@ export default function Documents() {
         description: formDescription || null,
         category: formCategory as 'briefing_institutional' | 'rules',
         file_url: fileUrl,
-        uploaded_by_user_id: user?.id || '',
+        uploaded_by_user_id: user.id,
         uploaded_by_name: profile?.name || 'Sistema',
       });
 
       toast.success('Documento enviado com sucesso!');
       resetForm();
       setIsUploadOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating document:', error);
-      toast.error('Falha ao salvar documento. Verifique os logs.');
+      const message = error?.message || error?.error || 'Erro desconhecido';
+      toast.error(`Falha ao salvar documento: ${message}`);
     } finally {
       setIsSubmitting(false);
     }

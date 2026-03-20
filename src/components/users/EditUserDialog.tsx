@@ -85,12 +85,20 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
 
       // Update role if changed
       if (formData.role !== user.role) {
-        const { error: roleError } = await api
+        const { data: roleData } = await api
           .from('user_roles')
-          .update({ role: formData.role })
-          .eq('user_id', user.user_id);
+          .select('*')
+          .eq('user_id', user.user_id)
+          .single();
 
-        if (roleError) throw roleError;
+        if (roleData) {
+          const { error: roleError } = await api
+            .from('user_roles')
+            .update({ role: formData.role })
+            .eq('id', roleData.id);
+
+          if (roleError) throw roleError;
+        }
       }
 
       // Handle influencer linking
