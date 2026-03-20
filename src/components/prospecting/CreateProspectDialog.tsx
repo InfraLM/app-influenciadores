@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import type { PipelineType } from '@/types/prospect';
 import { SIZE_CATEGORIES, BRAZILIAN_STATES, PIPELINE_LABELS, normalizeUrl } from '@/types/prospect';
-import { useCreateProspectCard } from '@/hooks/useProspects';
+import { useCreateProspectCard, useProspectCards } from '@/hooks/useProspects';
 
 export function CreateProspectDialog() {
   const [open, setOpen] = useState(false);
@@ -24,8 +24,14 @@ export function CreateProspectDialog() {
   const [pipelineType, setPipelineType] = useState<PipelineType | ''>('');
 
   const createCard = useCreateProspectCard();
+  const { data: existingCards } = useProspectCards();
 
   const isValid = name.trim() && instagramUrl.trim() && sizeCategory && niche.trim() && pipelineType;
+
+  const normalizedInstagram = normalizeUrl(instagramUrl.trim());
+  const isDuplicate = !!(normalizedInstagram && existingCards?.some(
+    (c) => c.instagram_url === normalizedInstagram
+  ));
 
   const handleSubmit = () => {
     if (!isValid) return;
@@ -97,7 +103,13 @@ export function CreateProspectDialog() {
                 value={instagramUrl}
                 onChange={(e) => setInstagramUrl(e.target.value)}
                 placeholder="https://instagram.com/perfil"
+                className={isDuplicate ? 'border-yellow-500' : ''}
               />
+              {isDuplicate && (
+                <p className="text-xs text-yellow-600 mt-1">
+                  Este Instagram já existe em outro card no sistema.
+                </p>
+              )}
             </div>
             <div>
               <Label>Categoria de Tamanho *</Label>

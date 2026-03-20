@@ -100,7 +100,13 @@ const createGenericController = (tableName, options = {}) => {
         res.status(201).json(result.rows[0]);
       } catch (error) {
         console.error(`Create ${tableName} error:`, error);
-        res.status(500).json({ error: `Erro ao criar ${tableName}` });
+        if (error.code === '23505') {
+          return res.status(409).json({ error: `Registro duplicado: ${error.detail || 'já existe um registro com esses dados'}` });
+        }
+        if (error.code === '23502') {
+          return res.status(400).json({ error: `Campo obrigatório faltando: ${error.column || 'campo desconhecido'}` });
+        }
+        res.status(500).json({ error: `Erro ao criar ${tableName}: ${error.message || ''}` });
       }
     },
 

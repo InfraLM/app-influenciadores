@@ -230,4 +230,3 @@ Para problemas ou dúvidas:
 ## 📄 Licença
 
 Propriedade da Liberdade Médica Educação.
-

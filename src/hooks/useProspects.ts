@@ -56,7 +56,7 @@ export function useCreateProspectCard() {
       toast({ title: 'Card criado com sucesso' });
     },
     onError: (err: any) => {
-      toast({ title: 'Erro ao criar card', description: err.message, variant: 'destructive' });
+      toast({ title: 'Erro ao criar card', description: err.error || err.message || 'Erro desconhecido', variant: 'destructive' });
     },
   });
 }
